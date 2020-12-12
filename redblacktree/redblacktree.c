@@ -1,154 +1,154 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct No{
-	int valor;
-	char cor;
-	struct No *esquerda;
-	struct No *direita;
-	struct No *pai;
-	struct No *tio;
-}TNoRB;
+typedef struct Node{
+	int value;
+	char color;
+	struct Node *left;
+	struct Node *right;
+	struct Node *parent;
+	struct Node *uncle;
+}TNodeRB;
 
 typedef struct{
-	TNoRB *raiz;
-}TArvoreRB;
+	TNodeRB *root;
+}TtreeRB;
 
-void inserirNo(TNoRB *n, TNoRB *raiz){
-	TNoRB *nAux;
-	if(raiz == NULL){
-		raiz->cor = 'B';
-		raiz->valor = n->valor;
-		raiz->esquerda = n->esquerda;
-		raiz->direita = n->direita;
-		raiz->pai = n->pai;
-		raiz->tio = n->tio;
-		raiz = n;
+void insertNode(TNodeRB *n, TNodeRB *root){
+	TNodeRB *nAux;
+	if(root == NULL){
+		root->color = 'B';
+		root->value = n->value;
+		root->left = n->left;
+		root->right = n->right;
+		root->parent = n->parent;
+		root->uncle = n->uncle;
+		root = n;
 	}else{
-		nAux = raiz;
+		nAux = root;
 		while(n != NULL){
-			if(nAux->valor < n->valor){
-				inserirNo(n->esquerda, nAux);
-				n->pai = nAux;
-				n->cor = 'R';
+			if(nAux->value < n->value){
+				insertNode(n->left, nAux);
+				n->parent = nAux;
+				n->color = 'R';
 			}else{
-				if(nAux->valor > n->valor || nAux->valor == n->valor){
-					inserirNo(n->direita, nAux);
-					n->pai = nAux;
-					n->cor = 'R';
+				if(nAux->value > n->value || nAux->value == n->value){
+					insertNode(n->right, nAux);
+					n->parent = nAux;
+					n->color = 'R';
 				}
 			}
 		}
 	}
 }
 
-void rotate_ll(TNoRB *n){
-	TNoRB *nAux = n;
-	if(n->cor == 'R' && n->direita->cor == 'R'){
-		nAux = n->pai;
-		n->esquerda = n;
-		n->tio = n->direita;
+void rotate_ll(TNodeRB *n){
+	TNodeRB *nAux = n;
+	if(n->color == 'R' && n->right->color == 'R'){
+		nAux = n->parent;
+		n->left = n;
+		n->uncle = n->right;
 		n = nAux;
-		n->cor = 'B';
+		n->color = 'B';
 	}
 }
 
-void rotate_rr(TNoRB *n){
-	TNoRB *nAux = n;
-	if(n->cor == 'R' && n->esquerda->cor == 'R'){
-		nAux = n->pai;
-		n = n->pai;
-		n->direita = n;
-		n->tio = n->esquerda;
+void rotate_rr(TNodeRB *n){
+	TNodeRB *nAux = n;
+	if(n->color == 'R' && n->left->color == 'R'){
+		nAux = n->parent;
+		n = n->parent;
+		n->right = n;
+		n->uncle = n->left;
 		n = nAux;
-		n->cor = 'B';
+		n->color = 'B';
 	}
 }
 
-void rotate_lr(TNoRB *n){
-	if(n->cor == 'R' && n->pai->cor == 'R' && n->direita->cor == 'R'){
+void rotate_lr(TNodeRB *n){
+	if(n->color == 'R' && n->parent->color == 'R' && n->right->color == 'R'){
 		rotate_ll(n);
-		rotate_rr(n->pai);
+		rotate_rr(n->parent);
 	}
 }
 
-void rotate_rl(TNoRB *n){
-	if(n->cor == 'R' && n->pai->cor == 'R' && n->esquerda->cor == 'R'){
+void rotate_rl(TNodeRB *n){
+	if(n->color == 'R' && n->parent->color == 'R' && n->left->color == 'R'){
 		rotate_rr(n);
-		rotate_ll(n->pai);
+		rotate_ll(n->parent);
 	}
 }
 
-void fixUp(TNoRB *raiz){
-	TNoRB *nAux = raiz;
+void fixUp(TNodeRB *root){
+	TNodeRB *nAux = root;
 	while(nAux != NULL){
-		if(nAux->cor == 'B'){
-			nAux = nAux->esquerda;
-			if(nAux->cor == 'R' && nAux->tio->cor == 'R'){
-				if(nAux->pai->cor == 'R'){
+		if(nAux->color == 'B'){
+			nAux = nAux->left;
+			if(nAux->color == 'R' && nAux->uncle->color == 'R'){
+				if(nAux->parent->color == 'R'){
 					rotate_lr(nAux);
 				}else{
 					rotate_ll(nAux);
 				}
-				nAux = nAux->esquerda;
+				nAux = nAux->left;
 			}
-			if(nAux->cor == 'R' && nAux->tio->cor == 'R'){
-				if(nAux->pai->cor == 'R'){
+			if(nAux->color == 'R' && nAux->uncle->color == 'R'){
+				if(nAux->parent->color == 'R'){
 					rotate_rl(nAux);
 				}else{
 					rotate_rr(nAux);
 				}
-				nAux = nAux->direita;
+				nAux = nAux->right;
 			}
 		}else{
-			nAux->cor = 'B';
-			fixUp(raiz);
+			nAux->color = 'B';
+			fixUp(root);
 		}
 	}
 }
 
-void removerNo(TNoRB *raiz, int valor){
-	TNoRB *nAux = raiz;
+void removeNode(TNodeRB *root, int value){
+	TNodeRB *nAux = root;
 	while(nAux != NULL){
-		if(nAux->valor < valor){
-			nAux = nAux->esquerda;
+		if(nAux->value < value){
+			nAux = nAux->left;
 		}
-		if(nAux->valor > valor){
-			nAux = nAux->direita;
+		if(nAux->value > value){
+			nAux = nAux->right;
 		}
-		if(nAux->valor == valor){
-			nAux->pai = nAux;
-			nAux->pai->esquerda = nAux->esquerda;
-			nAux->pai->direita = nAux->direita;
-			nAux->pai->tio = nAux->tio;
+		if(nAux->value == value){
+			nAux->parent = nAux;
+			nAux->parent->left = nAux->left;
+			nAux->parent->right = nAux->right;
+			nAux->parent->uncle = nAux->uncle;
 			nAux = NULL;
 		}
 	}
 }
 
-void percorrerInOrdem(TNoRB *n){
+void pathInOrder(TNodeRB *n){
 	if(n != NULL){
-		percorrerInOrdem(n->esquerda);
-		printf("Valor: %d\n Cor: %d\n", n->valor, n->cor);
-		percorrerInOrdem(n->direita);
+		pathInOrder(n->left);
+		printf("value: %d\n Color: %d\n", n->value, n->color);
+		pathInOrder(n->right);
 	}
 }
 
 int main(){
-	FILE *arquivo;
-	TArvoreRB *arvore;
-	TNoRB entrada[8];
+	FILE *file;
+	TtreeRB *tree;
+	TNodeRB input[8];
 	int i = 0;
 
-	arquivo = fopen("entrada.txt", "rt");
-	while(fgets(entrada[i], 8, arquivo) != NULL){
-		inserirNo(TNoRB entrada[i], arvore->raiz);
+	file = fopen("input.txt", "rt");
+	while(fgets(input[i], 8, file) != NULL){
+		insertNode(TNodeRB input[i], tree->root);
 		i++;
 	}
 
-	fixUp(arvore->raiz);
+	fixUp(tree->root);
 
-	percorrerInOrdem(arvore->raiz);
+	pathInOrder(tree->root);
 
 	return 0;
 }
