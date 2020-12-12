@@ -126,11 +126,11 @@ void removeNode(TNodeRB *root, int value){
 	}
 }
 
-void pathInOrder(TNodeRB *n){
+void searchInOrder(TNodeRB *n){
 	if(n != NULL){
-		pathInOrder(n->left);
+		searchInOrder(n->left);
 		printf("value: %d\n Color: %d\n", n->value, n->color);
-		pathInOrder(n->right);
+		searchInOrder(n->right);
 	}
 }
 
@@ -148,7 +148,7 @@ int main(){
 
 	fixUp(tree->root);
 
-	pathInOrder(tree->root);
+	searchInOrder(tree->root);
 
 	return 0;
 }
